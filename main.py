@@ -1,46 +1,84 @@
-import requests
-import json
+class BankAccount:
+    def __init__(self, account_number, account_name, balance=0):
+        self.account_number = account_number
+        self.account_name = account_name
+        self.balance = balance
 
-url = "https://jsonplaceholder.typicode.com/posts"
-response = requests.get(url)
+    def deposit(self, amount):
+        self.balance += amount
+        print(f"Depozit amalga oshirildi. Hozirgi balans: {self.balance}")
 
-if response.status_code == 200:
-    data = response.json()
-    for post in data:
-        print(post['userId'], post['id'], post['title'])
-else:
-    print('Error:', response.status_code)
+    def withdrawal(self, amount):
+        if amount > self.balance:
+            print("Balans yetarli emas")
+        else:
+            self.balance -= amount
+            print(f"Pul yechildi. Hozirgi balans: {self.balance}")
 
-url = "https://jsonplaceholder.typicode.com/posts/1"
-response = requests.get(url)
+    def check_balance(self):
+        print(f"Hozirgi balans: {self.balance}")
 
-if response.status_code == 200:
-    data = response.json()
-    print(data['userId'], data['id'], data['title'])
-else:
-    print('Error:', response.status_code)
 
-url = "https://jsonplaceholder.typicode.com/posts"
-data = {'userId': 1, 'title': 'New Post', 'body': 'This is a new post'}
-response = requests.post(url, data=json.dumps(data), headers={'Content-type': 'application/json'})
+class BankSystem:
+    def __init__(self):
+        self.accounts = {}
 
-if response.status_code == 201:
-    print('Post created successfully')
-else:
-    print('Error:', response.status_code)
+    def create_account(self, account_number, account_name, balance=0):
+        self.accounts[account_number] = BankAccount(account_number, account_name, balance)
+        print(f"Hisa yaratildi. Hisa raqam: {account_number}")
 
-url = "https://jsonplaceholder.typicode.com/posts/1"
-response = requests.put(url, data=json.dumps({'userId': 1, 'id': 1, 'title': 'Updated Post', 'body': 'This is an updated post'}), headers={'Content-type': 'application/json'})
+    def get_account(self, account_number):
+        return self.accounts.get(account_number)
 
-if response.status_code == 200:
-    print('Post updated successfully')
-else:
-    print('Error:', response.status_code)
+    def list_accounts(self):
+        for account in self.accounts.values():
+            print(f"Hisa raqam: {account.account_number}, Hisa nomi: {account.account_name}, Balans: {account.balance}")
 
-url = "https://jsonplaceholder.typicode.com/posts/1"
-response = requests.delete(url)
 
-if response.status_code == 200:
-    print('Post deleted successfully')
-else:
-    print('Error:', response.status_code)
+def main():
+    bank_system = BankSystem()
+    while True:
+        print("1. Hisa yaratish")
+        print("2. Hisaga depozit qilish")
+        print("3. Hisadan pul yechish")
+        print("4. Hisa balansini tekshirish")
+        print("5. Barcha hisalarni ko'rish")
+        print("6. Chiqish")
+        choice = input("Tanlang: ")
+        if choice == "1":
+            account_number = input("Hisa raqam: ")
+            account_name = input("Hisa nomi: ")
+            balance = float(input("Balans: "))
+            bank_system.create_account(account_number, account_name, balance)
+        elif choice == "2":
+            account_number = input("Hisa raqam: ")
+            account = bank_system.get_account(account_number)
+            if account:
+                amount = float(input("Depozit summa: "))
+                account.deposit(amount)
+            else:
+                print("Hisa topilmadi")
+        elif choice == "3":
+            account_number = input("Hisa raqam: ")
+            account = bank_system.get_account(account_number)
+            if account:
+                amount = float(input("Yechish summa: "))
+                account.withdrawal(amount)
+            else:
+                print("Hisa topilmadi")
+        elif choice == "4":
+            account_number = input("Hisa raqam: ")
+            account = bank_system.get_account(account_number)
+            if account:
+                account.check_balance()
+            else:
+                print("Hisa topilmadi")
+        elif choice == "5":
+            bank_system.list_accounts()
+        elif choice == "6":
+            break
+        else:
+            print("Noto'g'ri tanlov")
+
+if __name__ == "__main__":
+    main()
